@@ -48,7 +48,7 @@ sia = SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
 
 # WebDriver Configuration (Update the path accordingly)
-CHROMEDRIVER_PATH = r"C:\Users\ASUS\.wdm\chromedriver-win64\chromedriver.exe"
+CHROMEDRIVER_PATH = r"C:\Windows\chromedriver.exe"
 
 if not os.path.exists(CHROMEDRIVER_PATH):
     raise FileNotFoundError("Chromedriver not found at the specified path. Please update CHROMEDRIVER_PATH.")
