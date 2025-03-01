@@ -26,10 +26,12 @@ NLTK_DATA_DIR = "/tmp/nltk_data"
 os.makedirs(NLTK_DATA_DIR, exist_ok=True)
 nltk.data.path.append(NLTK_DATA_DIR)
 
-# ✅ Fix 3: Download NLTK Data to the new writable location
-nltk.download('vader_lexicon', download_dir=NLTK_DATA_DIR)
-nltk.download('stopwords', download_dir=NLTK_DATA_DIR)
-nltk.download('wordnet', download_dir=NLTK_DATA_DIR)
+# ✅ Fix: Download required NLTK resources only if they are missing
+for package in ['vader_lexicon', 'stopwords', 'wordnet']:
+    try:
+        nltk.data.find(f'corpora/{package}')
+    except LookupError:
+        nltk.download(package, download_dir=NLTK_DATA_DIR)
 
 # Download NLTK Resources
 nltk.download('vader_lexicon')
