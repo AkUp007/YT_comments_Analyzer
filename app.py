@@ -4,7 +4,7 @@ import re
 import nltk
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')# Use 'Agg' backend for Matplotlib to avoid GUI dependency
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request
 from selenium import webdriver
@@ -18,15 +18,15 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
 from wordcloud import WordCloud, STOPWORDS
 
-# ✅ Fix 1: Set Matplotlib cache directory to a writable location
+#  Set Matplotlib cache directory to a writable location
 os.environ['MPLCONFIGDIR'] = "/tmp/matplotlib_cache"
 
-# ✅ Fix 2: Set NLTK Data Directory to a Writable Location
+#  Set NLTK Data Directory to a Writable Location
 NLTK_DATA_DIR = "/tmp/nltk_data"
 os.makedirs(NLTK_DATA_DIR, exist_ok=True)
 nltk.data.path.append(NLTK_DATA_DIR)
 
-# ✅ Fix: Download required NLTK resources only if they are missing
+#  Download required NLTK resources only if they are missing
 for package in ['vader_lexicon', 'stopwords', 'wordnet']:
     try:
         nltk.data.find(f'corpora/{package}')
@@ -78,10 +78,12 @@ def returnytcomments(url):
 
     return data
 
-# Function to Clean Comments
+# Function to Clean Comments (Removing stopwords, lemmatizing, and filtering)
 def clean(org_comments):
     cleaned = []
     for x in org_comments:
+        x = re.sub(r'[\U0001F600-\U0001F64F]', '', x)  # Remove emojis
+        x = re.sub(r'[^a-zA-Z\s]', '', x.lower().strip())  
         words = x.lower().strip().split()
         words = [w for w in words if w not in stop_words and len(w) > 2]
         words = [wnl.lemmatize(w) for w in words]
@@ -98,7 +100,7 @@ def create_wordcloud(clean_reviews):
     plt.axis("off")
     plt.tight_layout()
     
-    CleanCache(directory="static/img")
+    CleanCache(directory="static/img")# Clean previous cache before saving
     plt.savefig("static/img/word_cl.jpeg")
     plt.close()
 
@@ -150,7 +152,7 @@ def inference():
     clean_comments = clean(org_comments)
     create_wordcloud(clean_comments)
 
-    np, nn, nne = 0, 0, 0
+    np, nn, nne = 0, 0, 0 #  Counters for sentiment categories
     predictions, scores = [], []
 
     for comment in clean_comments:
