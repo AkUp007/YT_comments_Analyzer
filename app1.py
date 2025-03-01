@@ -4,7 +4,7 @@ import re
 import nltk
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')# Use 'Agg' backend for Matplotlib to avoid GUI dependency
+matplotlib.use('Agg')  # Use 'Agg' backend for Matplotlib to avoid GUI dependency
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request
 from selenium import webdriver
@@ -17,26 +17,22 @@ from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
 from wordcloud import WordCloud, STOPWORDS
+from webdriver_manager.chrome import ChromeDriverManager  # Automatically manage chromedriver
 
-#  Set Matplotlib cache directory to a writable location
+# Set Matplotlib cache directory to a writable location
 os.environ['MPLCONFIGDIR'] = "/tmp/matplotlib_cache"
 
-#  Set NLTK Data Directory to a Writable Location
+# Set NLTK Data Directory to a Writable Location
 NLTK_DATA_DIR = "/tmp/nltk_data"
 os.makedirs(NLTK_DATA_DIR, exist_ok=True)
 nltk.data.path.append(NLTK_DATA_DIR)
 
-#  Download required NLTK resources only if they are missing
+# Download required NLTK resources only if they are missing
 for package in ['vader_lexicon', 'stopwords', 'wordnet']:
     try:
         nltk.data.find(f'corpora/{package}')
     except LookupError:
         nltk.download(package, download_dir=NLTK_DATA_DIR)
-
-# Download NLTK Resources
-nltk.download('vader_lexicon')
-nltk.download('stopwords')
-nltk.download('wordnet')
 
 # Initialize Flask App
 app = Flask(__name__, template_folder="composites")
@@ -47,36 +43,34 @@ wnl = WordNetLemmatizer()
 sia = SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
 
-# WebDriver Configuration (Update the path accordingly)
-CHROMEDRIVER_PATH = r"C:\Windows\chromedriver.exe"
-# CHROMEDRIVER_PATH = r"C:\Windows\chromedriver.exe"
-
-if not os.path.exists(CHROMEDRIVER_PATH):
-    raise FileNotFoundError("Chromedriver not found at the specified path. Please update CHROMEDRIVER_PATH.")
+# WebDriver Configuration (Automatically download and manage chromedriver)
+def get_chromedriver():
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")  # Run in headless mode
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")  # Required for cloud environments
+    options.add_argument("--disable-dev-shm-usage")  # Avoid memory issues
+    service = Service(ChromeDriverManager().install())
+    return webdriver.Chrome(service=service, options=options)
 
 # Function to Fetch YouTube Comments
 def returnytcomments(url):
     data = []
-    service = Service(CHROMEDRIVER_PATH)
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run in headless mode
-    options.add_argument("--disable-gpu")
-    
-    with webdriver.Chrome(service=service, options=options) as driver:
-        wait = WebDriverWait(driver, 15)
-        driver.get(url)
-        driver.maximize_window()
+    driver = get_chromedriver()
+    wait = WebDriverWait(driver, 15)
+    driver.get(url)
+    driver.maximize_window()
 
-        # Scroll down multiple times to load comments
-        for _ in range(5):
-            wait.until(EC.visibility_of_element_located((By.TAG_NAME, "body"))).send_keys(Keys.END)
-            time.sleep(3)
+    # Scroll down multiple times to load comments
+    for _ in range(5):
+        wait.until(EC.visibility_of_element_located((By.TAG_NAME, "body"))).send_keys(Keys.END)
+        time.sleep(3)
 
-        # Extract comments
-        for comment in wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#comment #content-text"))):
-            data.append(comment.text.strip())
-            
+    # Extract comments
+    for comment in wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#comment #content-text"))):
+        data.append(comment.text.strip())
 
+    driver.quit()
     return data
 
 # Function to Clean Comments (Removing stopwords, lemmatizing, and filtering)
@@ -84,7 +78,7 @@ def clean(org_comments):
     cleaned = []
     for x in org_comments:
         x = re.sub(r'[\U0001F600-\U0001F64F]', '', x)  # Remove emojis
-        x = re.sub(r'[^a-zA-Z\s]', '', x.lower().strip())  
+        x = re.sub(r'[^a-zA-Z\s]', '', x.lower().strip())
         words = x.lower().strip().split()
         words = [w for w in words if w not in stop_words and len(w) > 2]
         words = [wnl.lemmatize(w) for w in words]
@@ -95,13 +89,13 @@ def clean(org_comments):
 def create_wordcloud(clean_reviews):
     text = " ".join(clean_reviews)
     wc = WordCloud(width=1400, height=800, stopwords=set(STOPWORDS), background_color="white").generate(text)
-    
+
     plt.figure(figsize=(20, 10), facecolor="k", edgecolor="k")
     plt.imshow(wc, interpolation="bicubic")
     plt.axis("off")
     plt.tight_layout()
-    
-    CleanCache(directory="static/img")# Clean previous cache before saving
+
+    CleanCache(directory="static/img")  # Clean previous cache before saving
     plt.savefig("static/img/word_cl.jpeg")
     plt.close()
 
@@ -133,12 +127,12 @@ def home():
 @app.route('/results', methods=['GET'])
 def inference():
     url = request.args.get('url')
-    
+
     if not url:
         return render_template('home_page.html', error="Invalid URL")
 
     org_comments = returnytcomments(url)
-        # Handle case where no comments are found
+    # Handle case where no comments are found
     if not org_comments:
         return render_template('home_page.html', error="No comments found or comments are disabled on this video.")
 
@@ -149,11 +143,10 @@ def inference():
     if not org_comments:
         return render_template('home_page.html', error="All comments were too short or too long to analyze.")
 
-
     clean_comments = clean(org_comments)
     create_wordcloud(clean_comments)
 
-    np, nn, nne = 0, 0, 0 #  Counters for sentiment categories
+    np, nn, nne = 0, 0, 0  # Counters for sentiment categories
     predictions, scores = [], []
 
     for comment in clean_comments:
@@ -185,22 +178,6 @@ def inference():
 def word_cloud():
     return render_template('word_cloud.html')
 
-class CleanCache:
-	'''
-	this class is responsible to clear any residual csv and image files
-	present due to the past searches made.
-	'''
-	def __init__(self, directory=None):
-		self.clean_path = directory
-		# only proceed if directory is not empty
-		if os.listdir(self.clean_path) != list():
-			# iterate over the files and remove each file
-			files = os.listdir(self.clean_path)
-			for fileName in files:
-				print(fileName)
-				os.remove(os.path.join(self.clean_path,fileName))
-		print("cleaned!")
-
 # Run Flask App
-# if __name__ == "__main__":
-#     app.run(debug=True,  use_reloader=False)
+if __name__ == "__main__":
+    app.run(debug=True, use_reloader=False)
