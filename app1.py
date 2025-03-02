@@ -18,6 +18,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
 from wordcloud import WordCloud, STOPWORDS
 from webdriver_manager.chrome import ChromeDriverManager  # Automatically manage chromedriver
+from selenium.webdriver.chrome.options import Options
 
 # Set Matplotlib cache directory to a writable location
 os.environ['MPLCONFIGDIR'] = "/tmp/matplotlib_cache"
@@ -45,13 +46,17 @@ stop_words = set(stopwords.words('english'))
 
 # WebDriver Configuration (Automatically download and manage chromedriver)
 def get_chromedriver():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run in headless mode
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")  # Required for cloud environments
-    options.add_argument("--disable-dev-shm-usage")  # Avoid memory issues
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")  # Run in headless mode
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")  # Required for cloud environments
+    chrome_options.add_argument("--disable-dev-shm-usage")  # Avoid memory issues
+    chrome_options.add_argument("--remote-debugging-port=9222")  # Required for headless mode
+    chrome_options.binary_location = "/usr/bin/google-chrome"  # Path to Chrome binary
+
+    # Use webdriver_manager to automatically download and manage chromedriver
     service = Service(ChromeDriverManager().install())
-    return webdriver.Chrome(service=service, options=options)
+    return webdriver.Chrome(service=service, options=chrome_options)
 
 # Function to Fetch YouTube Comments
 def returnytcomments(url):

@@ -68,7 +68,7 @@ def returnytcomments(url):
         driver.maximize_window()
 
         # Scroll down multiple times to load comments
-        for _ in range(5):
+        for _ in range(10):
             wait.until(EC.visibility_of_element_located((By.TAG_NAME, "body"))).send_keys(Keys.END)
             time.sleep(3)
 
@@ -84,7 +84,7 @@ def clean(org_comments):
     cleaned = []
     for x in org_comments:
         x = re.sub(r'[\U0001F600-\U0001F64F]', '', x)  # Remove emojis
-        x = re.sub(r'[^a-zA-Z\s]', '', x.lower().strip())  
+        x = re.sub(r'[^a-zA-Z\s]', '', x.lower().strip())  # irrelevant non_alphabet removal
         words = x.lower().strip().split()
         words = [w for w in words if w not in stop_words and len(w) > 2]
         words = [wnl.lemmatize(w) for w in words]
@@ -202,5 +202,5 @@ class CleanCache:
 		print("cleaned!")
 
 # Run Flask App
-# if __name__ == "__main__":
-#     app.run(debug=True,  use_reloader=False)
+if __name__ == "__main__":
+    app.run(debug=True,  use_reloader=False)
