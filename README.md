@@ -102,5 +102,5 @@ This project is licensed under the **MIT License**.
 
 ## **👨‍💻 Author**  
 📌 **Your Name**  
-🔗 **GitHub**: [yourusername](https://github.com/AkUp007/)  
-🔗 **LinkedIn**: [yourlinkedin](https://www.linkedin.com/in/akashupadhyay007/)
+🔗 **GitHub**: [AkUp007](https://github.com/AkUp007/)  
+🔗 **LinkedIn**: [AkashUpadhyay](https://www.linkedin.com/in/akashupadhyay007/)
