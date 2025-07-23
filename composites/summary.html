@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+        background-image: url('/static/yts.jpg'); 
+        background-size: cover; 
+        background-position: center center;
+        background-repeat: no-repeat; 
+        background-attachment: fixed; 
+        font-family: sans-serif;
+        height: 100vh; 
+        margin: 0;
+        padding: 0;
+    }
+
+</style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+    integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <title>Video Summary</title>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 50px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: rgb(255, 255, 255);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .banner-img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: #dc3545;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            text-align: justify;
+        }
+
+        .btn-home {
+            margin-top: 30px;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+        }
+
+        footer {
+            margin-top: auto;
+            height: 30px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" style="background-color:rgba(153, 240, 153, 0.90);">
+        <h2>Video Summary</h2>
+        <p>{{ summary }}</p>
+
+        <a href="/" class="btn btn-primary btn-home">Back to Home</a>
+    </div>
+     <!-- <footer class='text-light bg-dark fixed-bottom'>
+        <p class='text-center py-1 my-0' style="color:white;">
+            Made by Akash
+        </p>
+    </footer> -->
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
