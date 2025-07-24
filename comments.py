@@ -16,6 +16,8 @@ from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
 from wordcloud import WordCloud, STOPWORDS
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 
 #  Set Matplotlib cache directory to a writable location
 os.environ['MPLCONFIGDIR'] = "/tmp/matplotlib_cache"
@@ -42,34 +44,36 @@ wnl = WordNetLemmatizer()
 sia = SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
 
-# WebDriver Configuration (Update the path accordingly)
-CHROMEDRIVER_PATH = r"C:\Windows\chromedriver.exe"
-if not os.path.exists(CHROMEDRIVER_PATH):
-    raise FileNotFoundError("Chromedriver not found at the specified path. Please update CHROMEDRIVER_PATH.")
+def get_webdriver():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-infobars")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--window-size=1920,1080")
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    return driver
 
 # Function to Fetch YouTube Comments
 def returnytcomments(url):
     data = []
-    service = Service(CHROMEDRIVER_PATH)
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run in headless mode
-    options.add_argument("--disable-gpu")
-    
-    with webdriver.Chrome(service=service, options=options) as driver:
-        wait = WebDriverWait(driver, 15)
-        driver.get(url)
-        driver.maximize_window()
+    driver = get_webdriver()
+    wait = WebDriverWait(driver, 15)
+    driver.get(url)
 
-        # Scroll down multiple times to load comments
-        for _ in range(10):
-            wait.until(EC.visibility_of_element_located((By.TAG_NAME, "body"))).send_keys(Keys.END)
-            time.sleep(3)
+    # Scroll down multiple times to load comments
+    for _ in range(10):
+        wait.until(EC.visibility_of_element_located((By.TAG_NAME, "body"))).send_keys(Keys.END)
+        time.sleep(3)
 
-        # Extract comments
-        for comment in wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#comment #content-text"))):
-            data.append(comment.text.strip())
-            
+    # Extract comments
+    for comment in wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#comment #content-text"))):
+        data.append(comment.text.strip())
 
+    driver.quit()
     return data
 
 # Function to Clean Comments (Removing stopwords, lemmatizing, and filtering)
