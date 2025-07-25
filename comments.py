@@ -3,6 +3,7 @@ import time
 import re
 import nltk
 import numpy as np
+import shutil
 import matplotlib
 matplotlib.use('Agg')# Use 'Agg' backend for Matplotlib to avoid GUI dependency
 import matplotlib.pyplot as plt
@@ -44,23 +45,27 @@ wnl = WordNetLemmatizer()
 sia = SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
 
+
 def get_webdriver():
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--disable-infobars")
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_path = "/usr/bin/chromium-browser"
-    if not os.path.exists(chrome_path):
-        raise RuntimeError("Chromium not found at /usr/bin/chromium-browser")
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+
+    # Dynamically find chromium path
+    chrome_path = shutil.which("chromium") or shutil.which("chromium-browser")
+    if not chrome_path:
+        raise RuntimeError("Chromium not found in PATH")
 
     chrome_options.binary_location = chrome_path
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    return driver
+    # Find chromedriver
+    driver_path = shutil.which("chromedriver")
+    if not driver_path:
+        raise RuntimeError("Chromedriver not found in PATH")
+
+    return webdriver.Chrome(executable_path=driver_path, options=chrome_options)
+
 
 # Function to Fetch YouTube Comments
 def returnytcomments(url):
