@@ -53,6 +53,11 @@ def get_webdriver():
     chrome_options.add_argument("--disable-infobars")
     chrome_options.add_argument("--disable-extensions")
     chrome_options.add_argument("--window-size=1920,1080")
+    chrome_path = "/usr/bin/chromium-browser"
+    if not os.path.exists(chrome_path):
+        raise RuntimeError("Chromium not found at /usr/bin/chromium-browser")
+
+    chrome_options.binary_location = chrome_path
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     return driver
