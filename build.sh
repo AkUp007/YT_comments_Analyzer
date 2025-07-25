@@ -1,15 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -o errexit
 
-# Update packages
-apt-get update
+# Install Python packages
 pip install -r requirements.txt
 
-# Optional: Download NLTK data in build phase
-python -m nltk.downloader stopwords wordnet vader_lexicon
-
 # Install Chromium and ChromeDriver
-apt-get install -y chromium-browser chromium-chromedriver
+apt-get update
+apt-get install -y chromium chromium-driver
 
-# Make sure environment variables point to the right paths (optional, safe)
-export CHROME_BIN=/usr/bin/chromium-browser
-export PATH=$PATH:/usr/bin
+# (Optional) For NLTK if needed
+# python -m nltk.downloader stopwords vader_lexicon
+
+echo "Build completed."
