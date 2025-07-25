@@ -2,6 +2,10 @@
 
 # Update packages
 apt-get update
+pip install -r requirements.txt
+
+# Optional: Download NLTK data in build phase
+python -m nltk.downloader stopwords wordnet vader_lexicon
 
 # Install Chromium and ChromeDriver
 apt-get install -y chromium-browser chromium-chromedriver
