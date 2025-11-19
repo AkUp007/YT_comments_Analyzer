@@ -3,7 +3,6 @@ import time
 import re
 import nltk
 import numpy as np
-import shutil
 import matplotlib
 matplotlib.use('Agg')# Use 'Agg' backend for Matplotlib to avoid GUI dependency
 import matplotlib.pyplot as plt
@@ -17,8 +16,6 @@ from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
 from wordcloud import WordCloud, STOPWORDS
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
 
 #  Set Matplotlib cache directory to a writable location
 os.environ['MPLCONFIGDIR'] = "/tmp/matplotlib_cache"
@@ -45,46 +42,60 @@ wnl = WordNetLemmatizer()
 sia = SentimentIntensityAnalyzer()
 stop_words = set(stopwords.words('english'))
 
-
-def get_webdriver():
-    chrome_options = Options()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-dev-shm-usage')
-
-    # Dynamically find chromium path
-    chrome_path = shutil.which("chromium") or shutil.which("chromium-browser")
-    if not chrome_path:
-        raise RuntimeError("Chromium not found in PATH")
-
-    chrome_options.binary_location = chrome_path
-
-    # Find chromedriver
-    driver_path = shutil.which("chromedriver")
-    if not driver_path:
-        raise RuntimeError("Chromedriver not found in PATH")
-
-    return webdriver.Chrome(executable_path=driver_path, options=chrome_options)
+# WebDriver Configuration (Update the path accordingly)
+CHROMEDRIVER_PATH = r"C:\Windows\chromedriver.exe"
+if not os.path.exists(CHROMEDRIVER_PATH):
+    raise FileNotFoundError("Chromedriver not found at the specified path. Please update CHROMEDRIVER_PATH.")
 
 
-# Function to Fetch YouTube Comments
+#     return data
 def returnytcomments(url):
-    data = []
-    driver = get_webdriver()
-    wait = WebDriverWait(driver, 15)
-    driver.get(url)
+    comments = []
 
-    # Scroll down multiple times to load comments
-    for _ in range(10):
-        wait.until(EC.visibility_of_element_located((By.TAG_NAME, "body"))).send_keys(Keys.END)
+    from selenium.webdriver.chrome.service import Service
+    from webdriver_manager.chrome import ChromeDriverManager
+    from selenium.webdriver.chrome.options import Options
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+    # ⭐ FIX: THIS LINE FORCES CHROMEDRIVER 142.x (auto-matching)
+    service = Service(ChromeDriverManager().install())
+
+    print("Using driver:", ChromeDriverManager().install())  # Debug: see actual driver path
+
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    wait = WebDriverWait(driver, 15)
+
+    try:
+        driver.get(url)
         time.sleep(3)
 
-    # Extract comments
-    for comment in wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#comment #content-text"))):
-        data.append(comment.text.strip())
+        for _ in range(12):
+            driver.find_element(By.TAG_NAME, "body").send_keys(Keys.END)
+            time.sleep(2)
 
-    driver.quit()
-    return data
+        elements = wait.until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#content-text"))
+        )
+
+        for el in elements:
+            text = el.text.strip()
+            if text:
+                comments.append(text)
+
+    except Exception as e:
+        print("Error while fetching comments:", e)
+
+    finally:
+        driver.quit()
+
+    return comments
+
+
 
 # Function to Clean Comments (Removing stopwords, lemmatizing, and filtering)
 def clean(org_comments):
